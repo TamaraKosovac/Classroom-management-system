@@ -15,6 +15,7 @@ model User {
   password  String
   role      Role
   createdAt DateTime @default(now())
+  reservations Reservation[]
 }
 
 model Classroom {
@@ -25,6 +26,20 @@ model Classroom {
   capacity    Int
   image       String?
   description String?
+  createdAt   DateTime @default(now())
+  reservations Reservation[]
+}
+
+model Reservation {
+  id          Int      @id @default(autoincrement())
+  date        DateTime
+  startTime   DateTime
+  endTime     DateTime
+  purpose     String?
+  user        User     @relation(fields: [userId], references: [id])
+  userId      Int
+  classroom   Classroom @relation(fields: [classroomId], references: [id])
+  classroomId Int
   createdAt   DateTime @default(now())
 }
 
