@@ -17,6 +17,17 @@ model User {
   createdAt DateTime @default(now())
 }
 
+model Classroom {
+  id          Int      @id @default(autoincrement())
+  name        String
+  building    String
+  floor       Int
+  capacity    Int
+  image       String?
+  description String?
+  createdAt   DateTime @default(now())
+}
+
 enum Role {
   ADMIN
   NASTAVNIK
