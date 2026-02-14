@@ -101,7 +101,6 @@ export default function DashboardLayout({
         <div className="p-8">{children}</div>
       </main>
 
-      {/* Logout Modal */}
       {showLogoutModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 w-[350px] shadow-lg">

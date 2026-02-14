@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import toast from "react-hot-toast";
 import { Trash2 } from "lucide-react";
 
 export default function DeleteUserButton({
@@ -8,9 +9,33 @@ export default function DeleteUserButton({
   deleteAction,
 }: {
   userId: number;
-  deleteAction: (formData: FormData) => void;
+  deleteAction: (formData: FormData) => Promise<void>;
 }) {
   const [open, setOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  function handleDelete() {
+    const formData = new FormData();
+    formData.append("id", String(userId));
+
+    startTransition(async () => {
+      const loadingToast = toast.loading("Deleting user...");
+
+      try {
+        await deleteAction(formData);
+
+        toast.success("User deleted successfully", {
+          id: loadingToast,
+        });
+
+        setOpen(false);
+      } catch {
+        toast.error("Failed to delete user", {
+          id: loadingToast,
+        });
+      }
+    });
+  }
 
   return (
     <>
@@ -35,20 +60,19 @@ export default function DeleteUserButton({
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setOpen(false)}
-                className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
+                disabled={isPending}
+                className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition disabled:opacity-50"
               >
-                 No
+                No
               </button>
 
-              <form action={deleteAction}>
-                <input type="hidden" name="id" value={userId} />
-                <button
-                  type="submit"
-                  className="px-4 py-2 rounded-lg bg-gray-700 text-white hover:bg-gray-800 transition"
-                >
-                  Yes
-                </button>
-              </form>
+              <button
+                onClick={handleDelete}
+                disabled={isPending}
+                className="px-4 py-2 rounded-lg bg-gray-700 text-white hover:bg-gray-800 transition disabled:opacity-50"
+              >
+                {isPending ? "Deleting..." : "Yes"}
+              </button>
             </div>
           </div>
         </div>

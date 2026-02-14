@@ -1,11 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { Role } from "@prisma/client";
 import bcrypt from "bcrypt";
-import Link from "next/link";
-import { Pencil, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { revalidatePath } from "next/cache";
 import DeleteUserModal from "./DeleteUserModal";
 import AddUserModal from "./AddUserModal";
+import EditUserModal from "./EditUserModal"; 
+
 
 async function deleteUser(formData: FormData) {
   "use server";
@@ -39,6 +40,31 @@ async function createUser(formData: FormData) {
       lastName,
       email,
       password: hashedPassword,
+      role,
+    },
+  });
+
+  revalidatePath("/dashboard/users");
+}
+
+
+async function updateUser(formData: FormData) {
+  "use server";
+
+  const id = Number(formData.get("id"));
+  const firstName = formData.get("firstName") as string;
+  const lastName = formData.get("lastName") as string;
+  const email = formData.get("email") as string;
+  const role = formData.get("role") as Role;
+
+  if (!id || !firstName || !lastName || !email || !role) return;
+
+  await prisma.user.update({
+    where: { id },
+    data: {
+      firstName,
+      lastName,
+      email,
       role,
     },
   });
@@ -150,12 +176,11 @@ export default async function UsersPage({
                 </td>
 
                 <td className="px-6 py-4 flex gap-3">
-                  <Link
-                    href={`/dashboard/users/${user.id}/edit`}
-                    className="text-gray-600 hover:text-blue-600 transition"
-                  >
-                    <Pencil size={18} />
-                  </Link>
+
+                  <EditUserModal
+                    user={user}
+                    updateAction={updateUser}
+                  />
 
                   <DeleteUserModal
                     userId={user.id}
