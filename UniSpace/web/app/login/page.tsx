@@ -32,8 +32,7 @@ export default function LoginPage() {
         return;
       }
 
-      localStorage.setItem("token", data.token);
-
+      document.cookie = `token=${data.token}; path=/;`;
       router.push("/dashboard");
 
     } catch {
