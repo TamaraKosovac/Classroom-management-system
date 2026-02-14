@@ -1,8 +1,11 @@
 import { prisma } from "@/lib/prisma";
+import { Role } from "@prisma/client";
+import bcrypt from "bcrypt";
 import Link from "next/link";
-import { Pencil, Plus, Search } from "lucide-react";
+import { Pencil, Search } from "lucide-react";
 import { revalidatePath } from "next/cache";
-import DeleteUserButton from "./DeleteUserButton";
+import DeleteUserModal from "./DeleteUserModal";
+import AddUserModal from "./AddUserModal";
 
 async function deleteUser(formData: FormData) {
   "use server";
@@ -16,13 +19,40 @@ async function deleteUser(formData: FormData) {
   revalidatePath("/dashboard/users");
 }
 
+
+async function createUser(formData: FormData) {
+  "use server";
+
+  const firstName = formData.get("firstName") as string;
+  const lastName = formData.get("lastName") as string;
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+  const role = formData.get("role") as Role;
+
+  if (!firstName || !lastName || !email || !password || !role) return;
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  await prisma.user.create({
+    data: {
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+      role,
+    },
+  });
+
+  revalidatePath("/dashboard/users");
+}
+
+
 export default async function UsersPage({
   searchParams,
 }: {
   searchParams: Promise<{ search?: string }>;
 }) {
   const params = await searchParams;
-
   const search = params?.search?.trim() ?? "";
 
   const users = await prisma.user.findMany({
@@ -57,7 +87,9 @@ export default async function UsersPage({
 
   return (
     <div className="space-y-6">
+
       <div className="flex items-center justify-between">
+
         <form
           method="GET"
           action="/dashboard/users"
@@ -79,13 +111,8 @@ export default async function UsersPage({
           <button type="submit" className="hidden" />
         </form>
 
-        <Link
-          href="/dashboard/users/create"
-          className="flex items-center gap-2 bg-gray-700 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-800 transition"
-        >
-          <Plus size={16} />
-          Add user
-        </Link>
+        <AddUserModal createUserAction={createUser} />
+
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -103,6 +130,7 @@ export default async function UsersPage({
           <tbody className="divide-y divide-gray-100 text-sm">
             {users.map((user) => (
               <tr key={user.id} className="hover:bg-gray-50 transition">
+
                 <td className="px-6 py-4 font-medium text-gray-700">
                   {user.firstName} {user.lastName}
                 </td>
@@ -129,11 +157,12 @@ export default async function UsersPage({
                     <Pencil size={18} />
                   </Link>
 
-                  <DeleteUserButton
+                  <DeleteUserModal
                     userId={user.id}
                     deleteAction={deleteUser}
                   />
                 </td>
+
               </tr>
             ))}
           </tbody>
