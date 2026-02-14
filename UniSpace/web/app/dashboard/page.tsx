@@ -13,17 +13,18 @@ import {
 export default function DashboardPage() {
   const router = useRouter();
   const [active, setActive] = useState("users");
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     if (!storedToken) {
-      router.push("/login");
+      router.replace("/login");
     }
   }, [router]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    router.push("/login");
+  const confirmLogout = () => {
+    localStorage.clear();
+    router.replace("/login");
   };
 
   return (
@@ -39,7 +40,6 @@ export default function DashboardPage() {
               width={32}
               height={32}
             />
-
             <div className="flex flex-col">
               <h2 className="text-lg font-semibold text-gray-700">
                 UniSpace
@@ -51,7 +51,6 @@ export default function DashboardPage() {
           </div>
 
           <nav className="mt-12 flex flex-col px-3 space-y-1">
-
             <div
               onClick={() => setActive("users")}
               className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition
@@ -87,20 +86,18 @@ export default function DashboardPage() {
               <CalendarDays size={18} />
               <span>Manage reservations</span>
             </div>
-
           </nav>
         </div>
 
         <div className="px-3 pb-6">
           <div
-            onClick={handleLogout}
-            className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-50 text-gray-700 hover:text-red-600 cursor-pointer transition"
+            onClick={() => setShowLogoutModal(true)}
+            className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700 cursor-pointer transition"
           >
             <LogOut size={18} />
             <span>Logout</span>
           </div>
         </div>
-
       </aside>
 
       <main className="flex-1 flex flex-col">
@@ -126,6 +123,36 @@ export default function DashboardPage() {
         </div>
 
       </main>
+
+      {showLogoutModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-[350px] shadow-lg">
+            <h2 className="text-lg font-semibold text-gray-800 mb-4">
+              Logout confirmation
+            </h2>
+            <p className="text-sm text-gray-600 mb-6">
+              Are you sure you want to log out?
+            </p>
+
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowLogoutModal(false)}
+                className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
+              >
+                No
+              </button>
+
+              <button
+                onClick={confirmLogout}
+                className="px-4 py-2 rounded-lg bg-gray-700 text-white hover:bg-gray-800 transition"
+              >
+                Yes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
