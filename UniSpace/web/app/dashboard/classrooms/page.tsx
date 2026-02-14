@@ -1,6 +1,139 @@
 import { prisma } from "@/lib/prisma";
-import Link from "next/link";
-import { Plus, Search } from "lucide-react";
+import { Search } from "lucide-react";
+import { revalidatePath } from "next/cache";
+import AddClassroomModal from "./AddClassroomModal";
+import EditClassroomModal from "./EditClassroomModal";
+import DeleteClassroomModal from "./DeleteClassroomModal";
+import DetailsClassroomModal from "./DetailsClassroomModal";
+import fs from "fs";
+import path from "path";
+
+
+async function createClassroom(formData: FormData) {
+  "use server";
+
+  const name = formData.get("name") as string;
+  const building = formData.get("building") as string;
+  const floor = Number(formData.get("floor"));
+  const capacity = Number(formData.get("capacity"));
+  const description = formData.get("description") as string;
+  const image = formData.get("image") as File | null;
+
+  if (!name || !building || isNaN(floor) || isNaN(capacity)) return;
+
+  let imagePath = "";
+
+  if (image && image.size > 0) {
+    const bytes = await image.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+
+    const uploadDir = path.join(process.cwd(), "public/uploads/classrooms");
+
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    const fileName = `${Date.now()}-${image.name}`;
+    const fullPath = path.join(uploadDir, fileName);
+
+    fs.writeFileSync(fullPath, buffer);
+
+    imagePath = `/uploads/classrooms/${fileName}`;
+  }
+
+  await prisma.classroom.create({
+    data: {
+      name,
+      building,
+      floor,
+      capacity,
+      description,
+      image: imagePath,
+    },
+  });
+
+  revalidatePath("/dashboard/classrooms");
+}
+
+
+async function updateClassroom(formData: FormData) {
+  "use server";
+
+  const id = Number(formData.get("id"));
+  const name = formData.get("name") as string;
+  const building = formData.get("building") as string;
+  const floor = Number(formData.get("floor"));
+  const capacity = Number(formData.get("capacity"));
+  const description = formData.get("description") as string;
+  const image = formData.get("image") as File | null;
+
+  if (!id || !name || !building || isNaN(floor) || isNaN(capacity)) return;
+
+  const existing = await prisma.classroom.findUnique({
+    where: { id },
+  });
+
+  let imagePath = existing?.image ?? "";
+
+  if (image && image.size > 0) {
+    const bytes = await image.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+
+    const uploadDir = path.join(process.cwd(), "public/uploads/classrooms");
+
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    const fileName = `${Date.now()}-${image.name}`;
+    const fullPath = path.join(uploadDir, fileName);
+
+    fs.writeFileSync(fullPath, buffer);
+
+    imagePath = `/uploads/classrooms/${fileName}`;
+  }
+
+  await prisma.classroom.update({
+    where: { id },
+    data: {
+      name,
+      building,
+      floor,
+      capacity,
+      description,
+      image: imagePath,
+    },
+  });
+
+  revalidatePath("/dashboard/classrooms");
+}
+
+
+async function deleteClassroom(formData: FormData) {
+  "use server";
+
+  const id = Number(formData.get("id"));
+  if (!id) return;
+
+  const existing = await prisma.classroom.findUnique({
+    where: { id },
+  });
+
+  if (existing?.image) {
+    const filePath = path.join(process.cwd(), "public", existing.image);
+
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+  }
+
+  await prisma.classroom.delete({
+    where: { id },
+  });
+
+  revalidatePath("/dashboard/classrooms");
+}
+
 
 export default async function ClassroomsPage({
   searchParams,
@@ -14,24 +147,12 @@ export default async function ClassroomsPage({
     where: search
       ? {
           OR: [
-            {
-              name: {
-                contains: search,
-                mode: "insensitive",
-              },
-            },
-            {
-              building: {
-                contains: search,
-                mode: "insensitive",
-              },
-            },
+            { name: { contains: search, mode: "insensitive" } },
+            { building: { contains: search, mode: "insensitive" } },
           ],
         }
       : undefined,
-    orderBy: {
-      createdAt: "desc",
-    },
+    orderBy: { createdAt: "desc" },
   });
 
   return (
@@ -58,13 +179,7 @@ export default async function ClassroomsPage({
           <button type="submit" className="hidden" />
         </form>
 
-        <Link
-          href="/dashboard/classrooms/create"
-          className="flex items-center gap-2 bg-gray-700 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-800 transition"
-        >
-          <Plus size={16} />
-          Add classroom
-        </Link>
+        <AddClassroomModal createAction={createClassroom} />
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -85,21 +200,29 @@ export default async function ClassroomsPage({
                 <td className="px-6 py-4 font-medium text-gray-700">
                   {room.name}
                 </td>
-
                 <td className="px-6 py-4 text-gray-600">
                   {room.building}
                 </td>
-
                 <td className="px-6 py-4 text-gray-600">
                   {room.floor}
                 </td>
-
                 <td className="px-6 py-4 text-gray-600">
                   {room.capacity}
                 </td>
-
                 <td className="px-6 py-4 text-gray-600">
                   {new Date(room.createdAt).toLocaleDateString()}
+                </td>
+
+                <td className="px-6 py-4 flex items-center gap-3">
+                  <DetailsClassroomModal classroom={room} />
+                  <EditClassroomModal
+                    classroom={room}
+                    updateAction={updateClassroom}
+                  />
+                  <DeleteClassroomModal
+                    classroomId={room.id}
+                    deleteAction={deleteClassroom}
+                  />
                 </td>
               </tr>
             ))}

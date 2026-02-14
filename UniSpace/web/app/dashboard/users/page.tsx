@@ -5,13 +5,15 @@ import { Search } from "lucide-react";
 import { revalidatePath } from "next/cache";
 import DeleteUserModal from "./DeleteUserModal";
 import AddUserModal from "./AddUserModal";
-import EditUserModal from "./EditUserModal"; 
+import EditUserModal from "./EditUserModal";
+import DetailsUserModal from "./DetailsUserModal";
 
 
 async function deleteUser(formData: FormData) {
   "use server";
 
   const id = Number(formData.get("id"));
+  if (!id) return;
 
   await prisma.user.delete({
     where: { id },
@@ -149,7 +151,6 @@ export default async function UsersPage({
               <th className="px-6 py-3">Email</th>
               <th className="px-6 py-3">Role</th>
               <th className="px-6 py-3">Created</th>
-              <th className="px-6 py-3">Actions</th>
             </tr>
           </thead>
 
@@ -175,7 +176,8 @@ export default async function UsersPage({
                   {new Date(user.createdAt).toLocaleDateString()}
                 </td>
 
-                <td className="px-6 py-4 flex gap-3">
+                <td className="px-6 py-4 flex items-center gap-3">
+                  <DetailsUserModal user={user} />
 
                   <EditUserModal
                     user={user}
