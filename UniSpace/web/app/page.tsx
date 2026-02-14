@@ -24,19 +24,12 @@ export default function Home() {
         teachers and administrators.
       </p>
 
-      <div className="mt-12 flex gap-6">
+      <div className="mt-12">
         <Link
           href="/login"
-          className="px-8 py-3 bg-gray-900 text-white rounded-xl shadow-md hover:bg-gray-700 transition duration-300"
+          className="px-8 py-3 bg-gray-600 text-white rounded-xl shadow-md hover:bg-gray-700 transition duration-300"
         >
           Login
-        </Link>
-
-        <Link
-          href="/register"
-          className="px-8 py-3 bg-white text-gray-900 border border-gray-300 rounded-xl shadow-md hover:bg-gray-100 transition duration-300"
-        >
-          Register
         </Link>
       </div>
 

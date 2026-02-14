@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -119,16 +118,6 @@ export default function LoginPage() {
             Login
           </button>
         </form>
-
-        <p className="text-center text-sm text-gray-600 mt-4">
-          Don&apos;t have an account?{" "}
-          <Link
-            href="/register"
-            className="text-gray-500 hover:text-gray-700 font-medium transition"
-          >
-            Register
-          </Link>
-        </p>
 
         {error && (
           <p className="text-red-600 mt-6 text-center text-sm">
