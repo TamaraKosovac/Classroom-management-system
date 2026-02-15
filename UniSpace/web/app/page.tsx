@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-gray-100 to-gray-200 flex flex-col items-center justify-center text-center px-6">
+    <div className="min-h-screen bg-gradient-to-br from-white via-gray-100 to-gray-200 flex flex-col items-center justify-center -mt-6 text-center px-6">
       
       <div className="mb-10">
         <Image
@@ -27,7 +27,7 @@ export default function Home() {
       <div className="mt-12">
         <Link
           href="/login"
-          className="px-8 py-3 bg-gray-600 text-white rounded-xl shadow-md hover:bg-gray-700 transition duration-300"
+          className="w-[500px] inline-block text-center px-8 py-3 bg-gray-600 text-white rounded-xl shadow-md hover:bg-gray-700 transition duration-300"
         >
           Login
         </Link>
