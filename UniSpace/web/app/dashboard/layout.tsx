@@ -8,6 +8,7 @@ import {
   Users,
   School,
   CalendarDays,
+  BarChart3,
   LogOut,
 } from "lucide-react";
 
@@ -21,7 +22,8 @@ export default function DashboardLayout({
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const confirmLogout = () => {
-    document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+    document.cookie =
+      "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
     setShowLogoutModal(false);
     router.replace("/login");
   };
@@ -34,7 +36,7 @@ export default function DashboardLayout({
     }`;
 
   return (
-    <div className="min-h-screen flex bg-[#e9ecef]">
+    <div className="h-screen flex bg-[#e9ecef] overflow-hidden">
       <aside className="w-64 bg-white border-r border-gray-200 flex flex-col justify-between">
         <div>
           <div className="flex gap-3 px-6 py-6 border-b border-gray-200">
@@ -55,19 +57,36 @@ export default function DashboardLayout({
           </div>
 
           <nav className="mt-12 flex flex-col px-3 space-y-1">
-            <Link href="/dashboard/users" className={linkStyle("/dashboard/users")}>
+            <Link
+              href="/dashboard/users"
+              className={linkStyle("/dashboard/users")}
+            >
               <Users size={18} />
               <span>Manage users</span>
             </Link>
 
-            <Link href="/dashboard/classrooms" className={linkStyle("/dashboard/classrooms")}>
+            <Link
+              href="/dashboard/classrooms"
+              className={linkStyle("/dashboard/classrooms")}
+            >
               <School size={18} />
               <span>Manage classrooms</span>
             </Link>
 
-            <Link href="/dashboard/reservations" className={linkStyle("/dashboard/reservations")}>
+            <Link
+              href="/dashboard/reservations"
+              className={linkStyle("/dashboard/reservations")}
+            >
               <CalendarDays size={18} />
               <span>Manage reservations</span>
+            </Link>
+
+            <Link
+              href="/dashboard/analytics"
+              className={linkStyle("/dashboard/analytics")}
+            >
+              <BarChart3 size={18} />
+              <span>Analytics</span>
             </Link>
           </nav>
         </div>
@@ -83,7 +102,7 @@ export default function DashboardLayout({
         </div>
       </aside>
 
-      <main className="flex-1 flex flex-col">
+      <main className="flex-1 flex flex-col overflow-hidden">
         <header className="bg-white px-8 min-h-[90px] border-b border-gray-200 flex items-center justify-between">
           <h1 className="text-xl font-semibold text-gray-700">
             Admin dashboard
@@ -98,7 +117,9 @@ export default function DashboardLayout({
           />
         </header>
 
-        <div className="p-8">{children}</div>
+        <div className="p-8 flex-1 overflow-hidden">
+          {children}
+        </div>
       </main>
 
       {showLogoutModal && (
