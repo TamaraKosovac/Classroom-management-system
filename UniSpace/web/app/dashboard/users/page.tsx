@@ -193,7 +193,6 @@ export default async function UsersPage({
               <th className="px-6 py-3">Full Name</th>
               <th className="px-6 py-3">Email</th>
               <th className="px-6 py-3">Role</th>
-              <th className="px-6 py-3">Created</th>
               <th className="px-6 py-3"></th>
             </tr>
           </thead>
@@ -232,10 +231,6 @@ export default async function UsersPage({
                   <span className="px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-700">
                     {user.role}
                   </span>
-                </td>
-
-                <td className="px-6 py-4 text-gray-600">
-                  {new Date(user.createdAt).toLocaleDateString()}
                 </td>
 
                 <td className="px-6 py-4 flex items-center gap-3 pt-6">

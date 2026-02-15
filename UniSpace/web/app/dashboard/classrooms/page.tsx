@@ -190,7 +190,6 @@ export default async function ClassroomsPage({
               <th className="px-6 py-3">Building</th>
               <th className="px-6 py-3">Floor</th>
               <th className="px-6 py-3">Capacity</th>
-              <th className="px-6 py-3">Created</th>
               <th className="px-6 py-3"></th>
             </tr>
           </thead>
@@ -209,9 +208,6 @@ export default async function ClassroomsPage({
                 </td>
                 <td className="px-6 py-4 text-gray-600">
                   {room.capacity}
-                </td>
-                <td className="px-6 py-4 text-gray-600">
-                  {new Date(room.createdAt).toLocaleDateString()}
                 </td>
 
                 <td className="px-6 py-4 flex items-center gap-3">

@@ -4,33 +4,35 @@ import { useState, useTransition } from "react";
 import toast from "react-hot-toast";
 import { Trash2 } from "lucide-react";
 
-export default function DeleteClassroomModal({
-  classroomId,
-  deleteAction,
-}: {
-  classroomId: number;
+type Props = {
+  reservationId: number;
   deleteAction: (formData: FormData) => Promise<void>;
-}) {
+};
+
+export default function DeleteReservationModal({
+  reservationId,
+  deleteAction,
+}: Props) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   function handleDelete() {
     const formData = new FormData();
-    formData.append("id", String(classroomId));
+    formData.append("id", String(reservationId));
 
     startTransition(async () => {
-      const loadingToast = toast.loading("Deleting classroom...");
+      const loadingToast = toast.loading("Deleting reservation...");
 
       try {
         await deleteAction(formData);
 
-        toast.success("Classroom deleted successfully", {
+        toast.success("Reservation deleted successfully", {
           id: loadingToast,
         });
 
         setOpen(false);
       } catch {
-        toast.error("Failed to delete classroom", {
+        toast.error("Failed to delete reservation", {
           id: loadingToast,
         });
       }
@@ -48,13 +50,14 @@ export default function DeleteClassroomModal({
 
       {open && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 w-[350px] shadow-lg">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">
-              Delete classroom
+          <div className="bg-white rounded-xl p-6 w-[350px] shadow-lg text-left">
+
+            <h2 className="text-lg font-semibold text-gray-800 mb-4 text-left">
+              Delete reservation
             </h2>
 
-            <p className="text-sm text-gray-600 mb-6">
-              Are you sure you want to delete this classroom?
+            <p className="text-sm text-gray-600 mb-6 text-left">
+              Are you sure you want to delete this reservation?
             </p>
 
             <div className="flex justify-end gap-3">
@@ -74,6 +77,7 @@ export default function DeleteClassroomModal({
                 {isPending ? "Deleting..." : "Yes"}
               </button>
             </div>
+
           </div>
         </div>
       )}

@@ -1,8 +1,10 @@
-export const dynamic = "force-dynamic";
-
 import { prisma } from "@/lib/prisma";
-import Link from "next/link";
-import { Plus, Search } from "lucide-react";
+import { revalidatePath } from "next/cache";
+import { Search } from "lucide-react";
+import AddReservationModal from "./AddReservationModal";
+import DetailsReservationModal from "./DetailsReservationModal";
+import EditReservationModal from "./EditReservationModal";
+import DeleteReservationModal from "./DeleteReservationModal";
 
 export default async function ReservationsPage({
   searchParams,
@@ -11,6 +13,91 @@ export default async function ReservationsPage({
 }) {
   const params = await searchParams;
   const search = params?.search?.trim() ?? "";
+
+  const users = await prisma.user.findMany({
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+    },
+    orderBy: { firstName: "asc" },
+  });
+
+  const classrooms = await prisma.classroom.findMany({
+    select: {
+      id: true,
+      name: true,
+    },
+    orderBy: { name: "asc" },
+  });
+
+  async function createReservation(formData: FormData) {
+    "use server";
+
+    const userId = Number(formData.get("userId"));
+    const classroomId = Number(formData.get("classroomId"));
+    const date = formData.get("date") as string;
+    const startTime = formData.get("startTime") as string;
+    const endTime = formData.get("endTime") as string;
+    const purpose = formData.get("purpose") as string; 
+
+    if (!userId || !classroomId || !date || !startTime || !endTime) return;
+
+    await prisma.reservation.create({
+      data: {
+        userId,
+        classroomId,
+        date: new Date(date),
+        startTime: new Date(`${date}T${startTime}`),
+        endTime: new Date(`${date}T${endTime}`),
+        purpose: purpose || null, 
+      },
+    });
+
+    revalidatePath("/dashboard/reservations");
+  }
+
+  async function updateReservation(formData: FormData) {
+    "use server";
+
+    const id = Number(formData.get("id"));
+    const userId = Number(formData.get("userId"));
+    const classroomId = Number(formData.get("classroomId"));
+    const date = formData.get("date") as string;
+    const startTime = formData.get("startTime") as string;
+    const endTime = formData.get("endTime") as string;
+    const purpose = formData.get("purpose") as string; 
+
+    if (!id || !userId || !classroomId || !date || !startTime || !endTime)
+      return;
+
+    await prisma.reservation.update({
+      where: { id },
+      data: {
+        userId,
+        classroomId,
+        date: new Date(date),
+        startTime: new Date(`${date}T${startTime}`),
+        endTime: new Date(`${date}T${endTime}`),
+        purpose: purpose || null, // ✅ DODANO
+      },
+    });
+
+    revalidatePath("/dashboard/reservations");
+  }
+
+  async function deleteReservation(formData: FormData) {
+    "use server";
+
+    const id = Number(formData.get("id"));
+    if (!id) return;
+
+    await prisma.reservation.delete({
+      where: { id },
+    });
+
+    revalidatePath("/dashboard/reservations");
+  }
 
   const reservations = await prisma.reservation.findMany({
     where: search
@@ -76,13 +163,11 @@ export default async function ReservationsPage({
           <button type="submit" className="hidden" />
         </form>
 
-        <Link
-          href="/dashboard/reservations/create"
-          className="flex items-center gap-2 bg-gray-700 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-800 transition"
-        >
-          <Plus size={16} />
-          Add reservation
-        </Link>
+        <AddReservationModal
+          createAction={createReservation}
+          users={users}
+          classrooms={classrooms}
+        />
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -93,7 +178,7 @@ export default async function ReservationsPage({
               <th className="px-6 py-3">Classroom</th>
               <th className="px-6 py-3">Date</th>
               <th className="px-6 py-3">Time</th>
-              <th className="px-6 py-3">Created</th>
+              <th className="px-6 py-3 text-center"></th>
             </tr>
           </thead>
 
@@ -124,8 +209,18 @@ export default async function ReservationsPage({
                   })}
                 </td>
 
-                <td className="px-6 py-4 text-gray-600">
-                  {new Date(res.createdAt).toLocaleDateString()}
+                <td className="px-6 py-4 text-center space-x-3">
+                  <DetailsReservationModal reservation={res} />
+                  <EditReservationModal
+                    reservation={res}
+                    users={users}
+                    classrooms={classrooms}
+                    updateAction={updateReservation}
+                  />
+                  <DeleteReservationModal
+                    reservationId={res.id}
+                    deleteAction={deleteReservation}
+                  />
                 </td>
               </tr>
             ))}
