@@ -15,21 +15,17 @@ export default async function ReservationsPage({
   const search = params?.search?.trim() ?? "";
 
   const users = await prisma.user.findMany({
-    select: {
-      id: true,
-      firstName: true,
-      lastName: true,
-    },
+    select: { id: true, firstName: true, lastName: true },
     orderBy: { firstName: "asc" },
   });
 
   const classrooms = await prisma.classroom.findMany({
-    select: {
-      id: true,
-      name: true,
-    },
+    select: { id: true, name: true },
     orderBy: { name: "asc" },
   });
+
+  const OPENING_HOUR = 8;
+  const CLOSING_HOUR = 20;
 
   async function createReservation(formData: FormData) {
     "use server";
@@ -37,20 +33,60 @@ export default async function ReservationsPage({
     const userId = Number(formData.get("userId"));
     const classroomId = Number(formData.get("classroomId"));
     const date = formData.get("date") as string;
-    const startTime = formData.get("startTime") as string;
-    const endTime = formData.get("endTime") as string;
-    const purpose = formData.get("purpose") as string; 
+    const startTimeStr = formData.get("startTime") as string;
+    const endTimeStr = formData.get("endTime") as string;
+    const purpose = formData.get("purpose") as string;
 
-    if (!userId || !classroomId || !date || !startTime || !endTime) return;
+    if (!userId || !classroomId || !date || !startTimeStr || !endTimeStr) {
+      throw new Error("Missing required fields.");
+    }
+
+    const startTime = new Date(`${date}T${startTimeStr}`);
+    const endTime = new Date(`${date}T${endTimeStr}`);
+    const now = new Date();
+
+    if (endTime <= startTime) {
+      throw new Error("End time must be after start time.");
+    }
+
+    if (startTime < now) {
+      throw new Error("You cannot create a reservation in the past.");
+    }
+
+    const startHour = startTime.getHours();
+    const endHour = endTime.getHours();
+
+    if (startHour < OPENING_HOUR || endHour > CLOSING_HOUR) {
+      throw new Error(
+        `Reservations are allowed only between ${OPENING_HOUR}:00 and ${CLOSING_HOUR}:00.`
+      );
+    }
+
+    const existingReservation = await prisma.reservation.findFirst({
+      where: {
+        classroomId,
+        endTime: { gt: now },
+        AND: [
+          { startTime: { lt: endTime } },
+          { endTime: { gt: startTime } },
+        ],
+      },
+    });
+
+    if (existingReservation) {
+      throw new Error(
+        "This classroom is already reserved during the selected time."
+      );
+    }
 
     await prisma.reservation.create({
       data: {
         userId,
         classroomId,
         date: new Date(date),
-        startTime: new Date(`${date}T${startTime}`),
-        endTime: new Date(`${date}T${endTime}`),
-        purpose: purpose || null, 
+        startTime,
+        endTime,
+        purpose: purpose || null,
       },
     });
 
@@ -64,12 +100,52 @@ export default async function ReservationsPage({
     const userId = Number(formData.get("userId"));
     const classroomId = Number(formData.get("classroomId"));
     const date = formData.get("date") as string;
-    const startTime = formData.get("startTime") as string;
-    const endTime = formData.get("endTime") as string;
-    const purpose = formData.get("purpose") as string; 
+    const startTimeStr = formData.get("startTime") as string;
+    const endTimeStr = formData.get("endTime") as string;
+    const purpose = formData.get("purpose") as string;
 
-    if (!id || !userId || !classroomId || !date || !startTime || !endTime)
-      return;
+    if (!id || !userId || !classroomId || !date || !startTimeStr || !endTimeStr) {
+      throw new Error("Missing required fields.");
+    }
+
+    const startTime = new Date(`${date}T${startTimeStr}`);
+    const endTime = new Date(`${date}T${endTimeStr}`);
+    const now = new Date();
+
+    if (endTime <= startTime) {
+      throw new Error("End time must be after start time.");
+    }
+
+    if (startTime < now) {
+      throw new Error("You cannot set a reservation in the past.");
+    }
+
+    const startHour = startTime.getHours();
+    const endHour = endTime.getHours();
+
+    if (startHour < OPENING_HOUR || endHour > CLOSING_HOUR) {
+      throw new Error(
+        `Reservations are allowed only between ${OPENING_HOUR}:00 and ${CLOSING_HOUR}:00.`
+      );
+    }
+
+    const existingReservation = await prisma.reservation.findFirst({
+      where: {
+        classroomId,
+        id: { not: id },
+        endTime: { gt: now },
+        AND: [
+          { startTime: { lt: endTime } },
+          { endTime: { gt: startTime } },
+        ],
+      },
+    });
+
+    if (existingReservation) {
+      throw new Error(
+        "This classroom is already reserved during the selected time."
+      );
+    }
 
     await prisma.reservation.update({
       where: { id },
@@ -77,9 +153,9 @@ export default async function ReservationsPage({
         userId,
         classroomId,
         date: new Date(date),
-        startTime: new Date(`${date}T${startTime}`),
-        endTime: new Date(`${date}T${endTime}`),
-        purpose: purpose || null, // ✅ DODANO
+        startTime,
+        endTime,
+        purpose: purpose || null,
       },
     });
 
@@ -105,38 +181,24 @@ export default async function ReservationsPage({
           OR: [
             {
               user: {
-                firstName: {
-                  contains: search,
-                  mode: "insensitive",
-                },
+                firstName: { contains: search, mode: "insensitive" },
               },
             },
             {
               user: {
-                lastName: {
-                  contains: search,
-                  mode: "insensitive",
-                },
+                lastName: { contains: search, mode: "insensitive" },
               },
             },
             {
               classroom: {
-                name: {
-                  contains: search,
-                  mode: "insensitive",
-                },
+                name: { contains: search, mode: "insensitive" },
               },
             },
           ],
         }
       : undefined,
-    include: {
-      user: true,
-      classroom: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
+    include: { user: true, classroom: true },
+    orderBy: { createdAt: "desc" },
   });
 
   return (
@@ -151,7 +213,6 @@ export default async function ReservationsPage({
             size={16}
             className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
           />
-
           <input
             type="text"
             name="search"
@@ -159,7 +220,6 @@ export default async function ReservationsPage({
             placeholder="Search reservations..."
             className="w-full border border-gray-300 rounded-lg pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-700 transition bg-white"
           />
-
           <button type="submit" className="hidden" />
         </form>
 
@@ -188,15 +248,12 @@ export default async function ReservationsPage({
                 <td className="px-6 py-4 font-medium text-gray-700">
                   {res.user.firstName} {res.user.lastName}
                 </td>
-
                 <td className="px-6 py-4 text-gray-600">
                   {res.classroom.name}
                 </td>
-
                 <td className="px-6 py-4 text-gray-600">
                   {new Date(res.date).toLocaleDateString()}
                 </td>
-
                 <td className="px-6 py-4 text-gray-600">
                   {new Date(res.startTime).toLocaleTimeString([], {
                     hour: "2-digit",
@@ -208,7 +265,6 @@ export default async function ReservationsPage({
                     minute: "2-digit",
                   })}
                 </td>
-
                 <td className="px-6 py-4 text-center space-x-3">
                   <DetailsReservationModal reservation={res} />
                   <EditReservationModal
