@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import toast from "react-hot-toast";
 import { Pencil, X } from "lucide-react";
+import Image from "next/image";
 import { Role } from "@prisma/client";
 
 type User = {
@@ -11,6 +12,7 @@ type User = {
   lastName: string;
   email: string;
   role: Role;
+  image?: string | null;
 };
 
 export default function EditUserModal({
@@ -22,6 +24,7 @@ export default function EditUserModal({
 }) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [preview, setPreview] = useState<string | null>(user.image ?? null);
 
   function handleSubmit(formData: FormData) {
     startTransition(async () => {
@@ -67,7 +70,10 @@ export default function EditUserModal({
               Edit user
             </h2>
 
-            <form action={handleSubmit} className="space-y-6">
+            <form
+              action={handleSubmit}
+              className="space-y-6"
+            >
               <input type="hidden" name="id" value={user.id} />
 
               <div className="grid grid-cols-2 gap-6">
@@ -121,6 +127,52 @@ export default function EditUserModal({
                     <option value="ADMIN">ADMIN</option>
                     <option value="NASTAVNIK">NASTAVNIK</option>
                   </select>
+                </div>
+
+                <div className="col-span-2">
+                  <label className="text-sm font-medium text-gray-600 mb-2 block">
+                    Profile image
+                  </label>
+
+                  <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 cursor-pointer hover:border-gray-500 transition">
+
+                    {preview ? (
+                      <div className="relative">
+                        <Image
+                          src={preview}
+                          alt="Preview"
+                          width={160}
+                          height={160}
+                          className="h-32 w-32 object-cover rounded-full"
+                          unoptimized
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setPreview(null)}
+                          className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-sm text-gray-500">
+                        Click to upload or drag image here
+                      </span>
+                    )}
+
+                    <input
+                      type="file"
+                      name="image"
+                      accept="image/*"
+                      hidden
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setPreview(URL.createObjectURL(file));
+                        }
+                      }}
+                    />
+                  </label>
                 </div>
 
               </div>

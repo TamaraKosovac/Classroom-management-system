@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Info, X, User, Mail, Shield, Calendar } from "lucide-react";
+import Image from "next/image";
 import { User as PrismaUser } from "@prisma/client";
 
 type Props = {
@@ -67,6 +68,20 @@ export default function DetailsUserModal({ user }: Props) {
               </div>
 
             </div>
+
+            {user.image && (
+              <div className="mt-5">
+                <Image
+                  src={user.image}
+                  alt={`${user.firstName} ${user.lastName}`}
+                  width={600}
+                  height={400}
+                  className="rounded-lg object-contain w-full max-h-96"
+                  unoptimized
+                />
+              </div>
+            )}
+
           </div>
         </div>
       )}

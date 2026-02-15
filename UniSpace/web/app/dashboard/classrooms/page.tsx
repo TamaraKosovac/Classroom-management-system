@@ -191,6 +191,7 @@ export default async function ClassroomsPage({
               <th className="px-6 py-3">Floor</th>
               <th className="px-6 py-3">Capacity</th>
               <th className="px-6 py-3">Created</th>
+              <th className="px-6 py-3"></th>
             </tr>
           </thead>
 
