@@ -2,35 +2,45 @@
 
 import { useState, useTransition } from "react";
 import toast from "react-hot-toast";
-import { X, Plus } from "lucide-react";
+import { Pencil, X } from "lucide-react";
 import Image from "next/image";
 
-export default function AddUserModal({
-  createUserAction,
+type User = {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  image?: string | null;
+};
+
+export default function EditProfileModal({
+  user,
+  updateAction,
 }: {
-  createUserAction: (formData: FormData) => Promise<void>;
+  user: User;
+  updateAction: (formData: FormData) => Promise<void>;
 }) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const [preview, setPreview] = useState<string | null>(null);
+  const [preview, setPreview] = useState<string | null>(user.image ?? null);
 
   function handleSubmit(formData: FormData) {
     startTransition(async () => {
-      const loadingToast = toast.loading("Creating user...");
+      const loadingToast = toast.loading("Saving changes...");
 
       try {
-        await createUserAction(formData);
+        await updateAction(formData);
 
-        toast.success("User successfully created", {
+        toast.success("Profile updated successfully", {
           id: loadingToast,
         });
 
-        setPreview(null);
         setOpen(false);
-      } catch {
-        toast.error("Failed to create user", {
-          id: loadingToast,
-        });
+      } catch (error: unknown) {
+        let message = "Update failed";
+        if (error instanceof Error) message = error.message;
+
+        toast.error(message, { id: loadingToast });
       }
     });
   }
@@ -41,8 +51,8 @@ export default function AddUserModal({
         onClick={() => setOpen(true)}
         className="flex items-center gap-2 bg-gray-700 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-800 transition"
       >
-        <Plus size={16} />
-        Add user
+        <Pencil size={16} />
+        Edit profile
       </button>
 
       {open && (
@@ -57,7 +67,7 @@ export default function AddUserModal({
             </button>
 
             <h2 className="text-lg font-semibold mb-6">
-              Add new user
+              Edit profile
             </h2>
 
             <form action={handleSubmit} className="space-y-6">
@@ -70,6 +80,7 @@ export default function AddUserModal({
                   </label>
                   <input
                     name="firstName"
+                    defaultValue={user.firstName}
                     required
                     className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-700 transition"
                   />
@@ -81,30 +92,7 @@ export default function AddUserModal({
                   </label>
                   <input
                     name="lastName"
-                    required
-                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-700 transition"
-                  />
-                </div>
-
-                <div className="flex flex-col">
-                  <label className="text-sm font-medium text-gray-600 mb-2">
-                    Email
-                  </label>
-                  <input
-                    name="email"
-                    type="email"
-                    required
-                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-700 transition"
-                  />
-                </div>
-
-                <div className="flex flex-col">
-                  <label className="text-sm font-medium text-gray-600 mb-2">
-                    Password
-                  </label>
-                  <input
-                    name="password"
-                    type="password"
+                    defaultValue={user.lastName}
                     required
                     className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-700 transition"
                   />
@@ -112,16 +100,39 @@ export default function AddUserModal({
 
                 <div className="flex flex-col col-span-2">
                   <label className="text-sm font-medium text-gray-600 mb-2">
-                    Role
+                    Email
                   </label>
-                  <select
-                    name="role"
-                    defaultValue="ADMIN"
+                  <input
+                    name="email"
+                    type="email"
+                    defaultValue={user.email}
+                    required
                     className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-700 transition"
-                  >
-                    <option value="ADMIN">ADMIN</option>
-                    <option value="NASTAVNIK">NASTAVNIK</option>
-                  </select>
+                  />
+                </div>
+
+                <div className="flex flex-col">
+                  <label className="text-sm font-medium text-gray-600 mb-2">
+                    Current password
+                  </label>
+                  <input
+                    name="currentPassword"
+                    type="password"
+                    placeholder="Leave empty if not changing"
+                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-700 transition"
+                  />
+                </div>
+
+                <div className="flex flex-col">
+                  <label className="text-sm font-medium text-gray-600 mb-2">
+                    New password
+                  </label>
+                  <input
+                    name="newPassword"
+                    type="password"
+                    placeholder="Leave empty if not changing"
+                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-700 transition"
+                  />
                 </div>
 
                 <div className="col-span-2">
@@ -136,8 +147,8 @@ export default function AddUserModal({
                         <Image
                           src={preview}
                           alt="Preview"
-                          width={150}
-                          height={150}
+                          width={160}
+                          height={160}
                           className="h-32 w-32 object-cover rounded-full"
                           unoptimized
                         />
@@ -151,7 +162,7 @@ export default function AddUserModal({
                       </div>
                     ) : (
                       <span className="text-sm text-gray-500">
-                        Click to upload avatar
+                        Click to upload or drag image here
                       </span>
                     )}
 
@@ -177,7 +188,7 @@ export default function AddUserModal({
                 disabled={isPending}
                 className="w-full bg-gray-700 text-white py-2.5 rounded-lg text-sm hover:bg-gray-800 transition disabled:opacity-50"
               >
-                {isPending ? "Saving..." : "Save"}
+                {isPending ? "Saving..." : "Save changes"}
               </button>
 
             </form>

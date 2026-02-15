@@ -10,6 +10,7 @@ import {
   CalendarDays,
   BarChart3,
   LogOut,
+  User,
 } from "lucide-react";
 
 export default function DashboardLayout({
@@ -87,6 +88,14 @@ export default function DashboardLayout({
             >
               <BarChart3 size={18} />
               <span>Analytics</span>
+            </Link>
+
+            <Link
+              href="/dashboard/profile"
+              className={linkStyle("/dashboard/profile")}
+            >
+              <User size={18} />
+              <span>My profile</span>
             </Link>
           </nav>
         </div>
