@@ -14,6 +14,7 @@ export async function GET(request: Request) {
         lastName: true,
         email: true,
         role: true,
+        image: true,        
         createdAt: true,
       },
     });

@@ -1,11 +1,26 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcrypt";
+import { writeFile } from "fs/promises";
+import path from "path";
+import { randomUUID } from "crypto";
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { firstName, lastName, email, password } = body;
+    const formData = await request.formData();
+
+    const firstName = formData.get("firstName") as string;
+    const lastName = formData.get("lastName") as string;
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    const file = formData.get("image") as File | null;
+
+    if (!firstName || !lastName || !email || !password) {
+      return NextResponse.json(
+        { error: "All fields are required" },
+        { status: 400 }
+      );
+    }
 
     const existingUser = await prisma.user.findUnique({
       where: { email },
@@ -33,6 +48,21 @@ export async function POST(request: Request) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    let imagePath: string | null = null;
+
+    if (file) {
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+
+      const fileName = `${randomUUID()}-${file.name}`;
+      const uploadDir = path.join(process.cwd(), "public/uploads");
+      const filePath = path.join(uploadDir, fileName);
+
+      await writeFile(filePath, buffer);
+
+      imagePath = `/uploads/${fileName}`;
+    }
+
     const newUser = await prisma.user.create({
       data: {
         firstName,
@@ -40,6 +70,7 @@ export async function POST(request: Request) {
         email,
         password: hashedPassword,
         role: "STUDENT",
+        image: imagePath,
       },
       select: {
         id: true,
@@ -47,6 +78,7 @@ export async function POST(request: Request) {
         lastName: true,
         email: true,
         role: true,
+        image: true,
         createdAt: true,
       },
     });

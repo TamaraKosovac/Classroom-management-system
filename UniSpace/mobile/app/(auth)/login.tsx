@@ -7,34 +7,65 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
+  Alert,
 } from "react-native";
 import { useState } from "react";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import * as ImagePicker from "expo-image-picker";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { jwtDecode } from "jwt-decode";
 
-export default function RegisterScreen() {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+type DecodedToken = {
+  userId: number;
+  role: string;
+  iat: number;
+  exp: number;
+};
+
+export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [image, setImage] = useState<string | null>(null);
 
-  const pickImage = async () => {
-    const permission =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
+  const API_URL = "http://192.168.1.3:3000";
 
-    if (!permission.granted) return;
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert("Error", "Please enter email and password");
+      return;
+    }
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.7,
-    });
+    try {
+      const response = await fetch(`${API_URL}/api/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
 
-    if (!result.canceled) {
-      setImage(result.assets[0].uri);
+      const data = await response.json();
+
+      if (!response.ok) {
+        Alert.alert("Error", data.error || "Login failed");
+        return;
+      }
+
+      const token = data.token;
+
+      const decoded = jwtDecode<DecodedToken>(token);
+
+      await AsyncStorage.setItem("token", token);
+      await AsyncStorage.setItem("role", decoded.role);
+
+      router.replace("/classrooms");
+
+    } catch (error) {
+      console.log(error);
+      Alert.alert("Error", "Network error");
     }
   };
 
@@ -43,8 +74,7 @@ export default function RegisterScreen() {
       style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <ScrollView contentContainerStyle={styles.inner}>
-
+      <View style={styles.inner}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.back()}
@@ -53,7 +83,7 @@ export default function RegisterScreen() {
         </TouchableOpacity>
 
         <Image
-          source={require("../assets/images/logo.png")}
+          source={require("../../assets/images/logo.png")}
           style={styles.logo}
           resizeMode="contain"
         />
@@ -63,41 +93,7 @@ export default function RegisterScreen() {
           Reserve. Manage. Simplify.
         </Text>
 
-        <TouchableOpacity
-          style={styles.imagePicker}
-          onPress={pickImage}
-        >
-          {image ? (
-            <Image source={{ uri: image }} style={styles.avatar} />
-          ) : (
-            <Ionicons name="person-outline" size={22} color="#6B7280" />
-          )}
-
-          <View style={styles.plusIcon}>
-            <Ionicons name="add" size={14} color="white" />
-          </View>
-        </TouchableOpacity>
-
         <View style={styles.form}>
-
-          <Text style={styles.label}>First Name</Text>
-          <TextInput
-            placeholder="Enter your first name"
-            placeholderTextColor="#9CA3AF"
-            value={firstName}
-            onChangeText={setFirstName}
-            style={styles.input}
-          />
-
-          <Text style={styles.label}>Last Name</Text>
-          <TextInput
-            placeholder="Enter your last name"
-            placeholderTextColor="#9CA3AF"
-            value={lastName}
-            onChangeText={setLastName}
-            style={styles.input}
-          />
-
           <Text style={styles.label}>Email</Text>
           <TextInput
             placeholder="Enter your email"
@@ -131,23 +127,24 @@ export default function RegisterScreen() {
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity style={styles.button}>
-            <Text style={styles.buttonText}>Register</Text>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleLogin}
+          >
+            <Text style={styles.buttonText}>Login</Text>
           </TouchableOpacity>
 
-          <View style={styles.loginContainer}>
-            <Text style={styles.loginText}>
-              Already have an account?{" "}
+          <View style={styles.registerContainer}>
+            <Text style={styles.registerText}>
+              Don&apos;t have an account?{" "}
             </Text>
 
-            <TouchableOpacity onPress={() => router.push("/login")}>
-              <Text style={styles.loginLink}>Login</Text>
+            <TouchableOpacity onPress={() => router.push("/register")}>
+              <Text style={styles.registerLink}>Register</Text>
             </TouchableOpacity>
           </View>
-
         </View>
-
-      </ScrollView>
+      </View>
     </KeyboardAvoidingView>
   );
 }
@@ -158,23 +155,24 @@ const styles = StyleSheet.create({
     backgroundColor: "#E9ECEF",
   },
   inner: {
+    flex: 1,
     padding: 25,
-    paddingTop: 110,
+    justifyContent: "center",
   },
   backButton: {
     position: "absolute",
-    top: 70,
+    top: 80,
     left: 20,
     zIndex: 10,
   },
   logo: {
-    width: 60,
-    height: 60,
+    width: 80,
+    height: 80,
     alignSelf: "center",
-    marginBottom: 8,
+    marginBottom: 10,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: "bold",
     textAlign: "center",
     color: "#4B5563",
@@ -182,42 +180,11 @@ const styles = StyleSheet.create({
   subtitle: {
     textAlign: "center",
     color: "#6B7280",
-    marginBottom: 25,
+    marginBottom: 60,
   },
-
-  imagePicker: {
-    alignSelf: "center",
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    backgroundColor: "white",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 5,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-  },
-  avatar: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-  },
-  plusIcon: {
-    position: "absolute",
-    bottom: -2,
-    right: -2,
-    backgroundColor: "#4B5563",
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
   form: {
-    marginTop: 5,
+    marginTop: 10,
   },
-
   label: {
     marginBottom: 6,
     color: "#4B5563",
@@ -226,13 +193,12 @@ const styles = StyleSheet.create({
   },
   input: {
     backgroundColor: "white",
-    padding: 14,
+    padding: 15,
     borderRadius: 10,
-    marginBottom: 18,
+    marginBottom: 20,
     borderWidth: 1,
     borderColor: "#E5E7EB",
   },
-
   passwordContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -240,36 +206,34 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     borderColor: "#E5E7EB",
-    paddingHorizontal: 14,
-    marginBottom: 18,
+    paddingHorizontal: 15,
+    marginBottom: 20,
   },
-
   passwordInput: {
     flex: 1,
-    paddingVertical: 14,
+    paddingVertical: 15,
   },
-
   button: {
     backgroundColor: "#4B5563",
-    padding: 14,
+    padding: 15,
     borderRadius: 10,
     alignItems: "center",
-    marginTop: 25,
+    marginTop: 60,
   },
   buttonText: {
     color: "white",
     fontWeight: "600",
     fontSize: 16,
   },
-  loginContainer: {
+  registerContainer: {
     flexDirection: "row",
     justifyContent: "center",
     marginTop: 15,
   },
-  loginText: {
+  registerText: {
     color: "#6B7280",
   },
-  loginLink: {
+  registerLink: {
     color: "#4B5563",
     fontWeight: "600",
   },
