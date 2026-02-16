@@ -11,6 +11,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import ConfirmDeleteModal from "../../components/ConfirmDeleteModal";
+import EditProfileModal from "../../components/EditProfileModal";
 
 type User = {
   id: number;
@@ -28,32 +29,33 @@ export default function ProfileScreen() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [logoutVisible, setLogoutVisible] = useState(false);
+  const [editVisible, setEditVisible] = useState(false);
+
+  const fetchUser = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+
+      const response = await fetch(`${API_URL}/api/profile`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+      setUser(data);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const token = await AsyncStorage.getItem("token");
-
-        const response = await fetch(`${API_URL}/api/profile`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const data = await response.json();
-        setUser(data);
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchUser();
   }, []);
 
   const handleEdit = () => {
-    router.push("/");
+    setEditVisible(true);
   };
 
   const confirmLogout = async () => {
@@ -144,6 +146,16 @@ export default function ProfileScreen() {
         message="Are you sure you want to log out?"
         onCancel={() => setLogoutVisible(false)}
         onConfirm={confirmLogout}
+      />
+
+      <EditProfileModal
+        visible={editVisible}
+        onClose={() => setEditVisible(false)}
+        user={user}
+        onSuccess={() => {
+          setLoading(true);
+          fetchUser();
+        }}
       />
     </View>
   );
