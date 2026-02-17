@@ -1,0 +1,285 @@
+import {
+  View,
+  Text,
+  Modal,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  ScrollView,
+} from "react-native";
+import { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { API_URL } from "../lib/config";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { Ionicons } from "@expo/vector-icons";
+
+type Classroom = {
+  id: number;
+  name: string;
+};
+
+type Props = {
+  visible: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+};
+
+export default function AddReservationModal({
+  visible,
+  onClose,
+  onSuccess,
+}: Props) {
+  const [classrooms, setClassrooms] = useState<Classroom[]>([]);
+  const [selectedClassroom, setSelectedClassroom] = useState<number | null>(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const [date, setDate] = useState(new Date());
+  const [startTime, setStartTime] = useState(new Date());
+  const [endTime, setEndTime] = useState(new Date());
+  const [purpose, setPurpose] = useState("");
+
+  useEffect(() => {
+    const fetchClassrooms = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/classrooms`);
+        const data: Classroom[] = await response.json();
+        setClassrooms(data);
+
+        if (data.length > 0) {
+          setSelectedClassroom(data[0].id);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchClassrooms();
+  }, []);
+
+  const handleSave = async () => {
+    if (!selectedClassroom) {
+      Alert.alert("Error", "Please select classroom");
+      return;
+    }
+
+    try {
+      const token = await AsyncStorage.getItem("token");
+
+      // 🔥 OVO JE KLJUČNO
+      // Spajamo izabrani DATE sa TIME picker satima
+
+      const finalStart = new Date(date);
+      finalStart.setHours(
+        startTime.getHours(),
+        startTime.getMinutes(),
+        0,
+        0
+      );
+
+      const finalEnd = new Date(date);
+      finalEnd.setHours(
+        endTime.getHours(),
+        endTime.getMinutes(),
+        0,
+        0
+      );
+
+      const response = await fetch(`${API_URL}/api/reservations`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          classroomId: selectedClassroom,
+          date: finalStart.toISOString(),      
+          startTime: finalStart.toISOString(), 
+          endTime: finalEnd.toISOString(),    
+          purpose,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        Alert.alert("Error", data.error || "Failed to create reservation");
+        return;
+      }
+
+      setPurpose("");
+      setDropdownOpen(false);
+      onSuccess();
+      onClose();
+    } catch (error) {
+      console.log("Create reservation error:", error);
+      Alert.alert("Error", "Failed to create reservation");
+    }
+  };
+
+  return (
+    <Modal visible={visible} animationType="fade" transparent>
+      <View style={styles.overlay}>
+        <View style={styles.modal}>
+          <View style={styles.header}>
+            <Text style={styles.title}>Add Reservation</Text>
+            <TouchableOpacity onPress={onClose}>
+              <Ionicons name="close" size={24} color="#6B7280" />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <Text style={styles.label}>Classroom</Text>
+
+            <TouchableOpacity
+              style={styles.dropdown}
+              onPress={() => setDropdownOpen(!dropdownOpen)}
+            >
+              <Text style={{ color: "#111827" }}>
+                {selectedClassroom
+                  ? classrooms.find((c) => c.id === selectedClassroom)?.name
+                  : ""}
+              </Text>
+
+              <Ionicons
+                name={dropdownOpen ? "chevron-up" : "chevron-down"}
+                size={20}
+                color="#6B7280"
+              />
+            </TouchableOpacity>
+
+            {dropdownOpen && (
+              <View style={styles.dropdownList}>
+                <ScrollView nestedScrollEnabled>
+                  {classrooms.map((c) => (
+                    <TouchableOpacity
+                      key={c.id}
+                      style={[
+                        styles.dropdownItem,
+                        selectedClassroom === c.id && styles.selectedItem,
+                      ]}
+                      onPress={() => {
+                        setSelectedClassroom(c.id);
+                        setDropdownOpen(false);
+                      }}
+                    >
+                      <Text>{c.name}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            )}
+
+            <Text style={styles.label}>Date</Text>
+            <DateTimePicker
+              value={date}
+              mode="date"
+              onChange={(e, selected) => selected && setDate(selected)}
+            />
+
+            <Text style={styles.label}>Start Time</Text>
+            <DateTimePicker
+              value={startTime}
+              mode="time"
+              onChange={(e, selected) => selected && setStartTime(selected)}
+            />
+
+            <Text style={styles.label}>End Time</Text>
+            <DateTimePicker
+              value={endTime}
+              mode="time"
+              onChange={(e, selected) => selected && setEndTime(selected)}
+            />
+
+            <Text style={styles.label}>Purpose</Text>
+            <TextInput
+              placeholder="Optional"
+              value={purpose}
+              onChangeText={setPurpose}
+              style={styles.input}
+              placeholderTextColor="#9CA3AF"
+            />
+
+            <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+              <Text style={styles.saveText}>Save</Text>
+            </TouchableOpacity>
+          </ScrollView>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "center",
+    padding: 20,
+  },
+  modal: {
+    backgroundColor: "white",
+    borderRadius: 16,
+    padding: 20,
+    maxHeight: "90%",
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  label: {
+    fontSize: 14,
+    color: "#6B7280",
+    marginTop: 12,
+  },
+  dropdown: {
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    borderRadius: 10,
+    padding: 14,
+    marginTop: 6,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  dropdownList: {
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    borderRadius: 10,
+    marginTop: 5,
+    maxHeight: 150,
+    backgroundColor: "white",
+  },
+  dropdownItem: {
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+  },
+  selectedItem: {
+    backgroundColor: "#F3F4F6",
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    borderRadius: 10,
+    padding: 12,
+    marginTop: 6,
+  },
+  saveButton: {
+    backgroundColor: "#4B5563",
+    padding: 14,
+    borderRadius: 10,
+    marginTop: 25,
+    alignItems: "center",
+  },
+  saveText: {
+    color: "white",
+    fontWeight: "600",
+  },
+});

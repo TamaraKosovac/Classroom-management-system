@@ -22,7 +22,6 @@ export async function GET() {
     });
 
     return NextResponse.json(reservations, { status: 200 });
-
   } catch {
     return NextResponse.json(
       { error: "Something went wrong" },
@@ -66,17 +65,41 @@ export async function POST(request: Request) {
     const reservationDate = new Date(date);
     const start = new Date(startTime);
     const end = new Date(endTime);
+    const now = new Date();
+
+    if (start >= end) {
+      return NextResponse.json(
+        { error: "Start time must be before end time" },
+        { status: 400 }
+      );
+    }
+
+    if (start < now) {
+      return NextResponse.json(
+        { error: "Cannot create reservation in the past" },
+        { status: 400 }
+      );
+    }
+
+    const openingTime = new Date(start);
+    openingTime.setHours(8, 0, 0, 0);
+
+    const closingTime = new Date(start);
+    closingTime.setHours(20, 0, 0, 0);
+
+    if (start < openingTime || end > closingTime) {
+      return NextResponse.json(
+        { error: "Reservations allowed only between 08:00 and 20:00" },
+        { status: 400 }
+      );
+    }
 
     const conflictingReservation = await prisma.reservation.findFirst({
       where: {
         classroomId: Number(classroomId),
         date: reservationDate,
-        OR: [
-          {
-            startTime: { lt: end },
-            endTime: { gt: start },
-          },
-        ],
+        startTime: { lt: end },
+        endTime: { gt: start },
       },
     });
 
