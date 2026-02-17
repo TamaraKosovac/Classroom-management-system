@@ -14,6 +14,7 @@ import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { jwtDecode } from "jwt-decode";
+import { API_URL } from "../../lib/config";
 
 type DecodedToken = {
   userId: number;
@@ -27,7 +28,6 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const API_URL = "http://192.168.1.3:3000";
 
   const handleLogin = async () => {
     if (!email || !password) {

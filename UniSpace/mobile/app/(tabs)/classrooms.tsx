@@ -10,6 +10,8 @@ import {
 import { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { API_URL } from "../../lib/config";
+
 
 type Classroom = {
   id: number;
@@ -21,7 +23,6 @@ type Classroom = {
   description?: string | null;
 };
 
-const API_URL = "http://192.168.1.3:3000";
 
 export default function ClassroomsScreen() {
   const [classrooms, setClassrooms] = useState<Classroom[]>([]);

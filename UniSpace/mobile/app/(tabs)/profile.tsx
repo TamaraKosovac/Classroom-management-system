@@ -12,6 +12,7 @@ import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import ConfirmDeleteModal from "../../components/ConfirmDeleteModal";
 import EditProfileModal from "../../components/EditProfileModal";
+import { API_URL } from "../../lib/config";
 
 type User = {
   id: number;
@@ -22,8 +23,6 @@ type User = {
   image?: string | null;
   createdAt: string;
 };
-
-const API_URL = "http://192.168.1.3:3000";
 
 export default function ProfileScreen() {
   const [user, setUser] = useState<User | null>(null);

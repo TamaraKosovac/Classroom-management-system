@@ -14,6 +14,8 @@ import { useState } from "react";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
+import { API_URL } from "../../lib/config";
+
 
 export default function RegisterScreen() {
   const [firstName, setFirstName] = useState("");
@@ -23,7 +25,6 @@ export default function RegisterScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [image, setImage] = useState<string | null>(null);
 
-  const API_URL = "http://192.168.1.3:3000";
 
   const pickImage = async () => {
     const permission =

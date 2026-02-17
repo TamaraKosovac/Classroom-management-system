@@ -13,6 +13,7 @@ import { useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
+import { API_URL } from "../lib/config";
 
 type Props = {
   visible: boolean;
@@ -26,7 +27,6 @@ type Props = {
   onSuccess: () => void;
 };
 
-const API_URL = "http://192.168.1.3:3000";
 
 export default function EditProfileModal({
   visible,
