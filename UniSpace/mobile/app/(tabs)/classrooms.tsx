@@ -6,12 +6,12 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Image,
+  TextInput,
 } from "react-native";
 import { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { API_URL } from "../../lib/config";
-
 
 type Classroom = {
   id: number;
@@ -23,10 +23,15 @@ type Classroom = {
   description?: string | null;
 };
 
-
 export default function ClassroomsScreen() {
   const [classrooms, setClassrooms] = useState<Classroom[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const [searchVisible, setSearchVisible] = useState(false);
+  const [searchText, setSearchText] = useState("");
+
+  const [floorFilterVisible, setFloorFilterVisible] = useState(false);
+  const [selectedFloor, setSelectedFloor] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchClassrooms = async () => {
@@ -44,6 +49,18 @@ export default function ClassroomsScreen() {
     fetchClassrooms();
   }, []);
 
+  const uniqueFloors = [...new Set(classrooms.map((c) => c.floor))].sort(
+    (a, b) => a - b
+  );
+
+  const filteredClassrooms = classrooms
+    .filter((item) =>
+      item.name.toLowerCase().includes(searchText.toLowerCase())
+    )
+    .filter((item) =>
+      selectedFloor !== null ? item.floor === selectedFloor : true
+    );
+
   if (loading) {
     return (
       <View style={styles.loader}>
@@ -54,18 +71,107 @@ export default function ClassroomsScreen() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.headerRow}>
+        <View style={{ flex: 1 }} />
+
+        <View style={styles.iconRow}>
+          <TouchableOpacity
+            onPress={() =>
+              setFloorFilterVisible(!floorFilterVisible)
+            }
+          >
+            <Ionicons
+              name="layers-outline"
+              size={26}
+              color={
+                selectedFloor !== null ? "#111827" : "#4B5563"
+              }
+            />
+          </TouchableOpacity>
+
+          {searchVisible ? (
+            <View style={styles.searchContainer}>
+              <TextInput
+                placeholder="Search classroom..."
+                value={searchText}
+                onChangeText={setSearchText}
+                style={styles.searchInput}
+                autoFocus
+              />
+              <TouchableOpacity
+                onPress={() => {
+                  setSearchVisible(false);
+                  setSearchText("");
+                }}
+              >
+                <Ionicons name="close" size={22} color="#6B7280" />
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity
+              onPress={() => setSearchVisible(true)}
+            >
+              <Ionicons
+                name="search-outline"
+                size={26}
+                color="#4B5563"
+              />
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+
+      {floorFilterVisible && (
+        <View style={styles.overlay}>
+          <View style={styles.floorFilterContainer}>
+            <TouchableOpacity
+              onPress={() => {
+                setSelectedFloor(null);
+                setFloorFilterVisible(false);
+              }}
+            >
+              <Text
+                style={[
+                  styles.floorOption,
+                  selectedFloor === null && styles.floorActive,
+                ]}
+              >
+                All Floors
+              </Text>
+            </TouchableOpacity>
+
+            {uniqueFloors.map((floor) => (
+              <TouchableOpacity
+                key={floor}
+                onPress={() => {
+                  setSelectedFloor(floor);
+                  setFloorFilterVisible(false);
+                }}
+              >
+                <Text
+                  style={[
+                    styles.floorOption,
+                    selectedFloor === floor &&
+                      styles.floorActive,
+                  ]}
+                >
+                  Floor {floor}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      )}
+
       <FlatList
-        data={classrooms}
+        data={filteredClassrooms}
         keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={{
-          paddingTop: 60,
-          paddingBottom: 20,
-        }}
+        contentContainerStyle={{ paddingBottom: 20 }}
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.card}
             onPress={() =>
-              router.push(`/classrooms/${item.id}`)  
+              router.push(`/classrooms/${item.id}`)
             }
           >
             {item.image && (
@@ -113,6 +219,65 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#E9ECEF",
     paddingHorizontal: 16,
+  },
+
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 50,
+    marginBottom: 20,
+  },
+
+  iconRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 18,
+  },
+
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "white",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    width: 220,
+  },
+
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+  },
+
+  overlay: {
+    position: "absolute",
+    top: 110,
+    right: 16,
+    zIndex: 999,
+  },
+
+  floorFilterContainer: {
+    backgroundColor: "white",
+    borderRadius: 14,
+    padding: 14,
+    width: 160,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    shadowColor: "#000",
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+
+  floorOption: {
+    fontSize: 16,
+    paddingVertical: 6,
+    color: "#4B5563",
+  },
+
+  floorActive: {
+    fontWeight: "bold",
+    color: "#111827",
   },
 
   loader: {

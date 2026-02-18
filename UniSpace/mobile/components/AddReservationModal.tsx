@@ -39,6 +39,10 @@ export default function AddReservationModal({
   const [endTime, setEndTime] = useState(new Date());
   const [purpose, setPurpose] = useState("");
 
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false);
+
   useEffect(() => {
     const fetchClassrooms = async () => {
       try {
@@ -66,9 +70,6 @@ export default function AddReservationModal({
     try {
       const token = await AsyncStorage.getItem("token");
 
-      // 🔥 OVO JE KLJUČNO
-      // Spajamo izabrani DATE sa TIME picker satima
-
       const finalStart = new Date(date);
       finalStart.setHours(
         startTime.getHours(),
@@ -93,9 +94,9 @@ export default function AddReservationModal({
         },
         body: JSON.stringify({
           classroomId: selectedClassroom,
-          date: finalStart.toISOString(),      
-          startTime: finalStart.toISOString(), 
-          endTime: finalEnd.toISOString(),    
+          date: finalStart.toISOString(),
+          startTime: finalStart.toISOString(),
+          endTime: finalEnd.toISOString(),
           purpose,
         }),
       });
@@ -171,25 +172,79 @@ export default function AddReservationModal({
             )}
 
             <Text style={styles.label}>Date</Text>
-            <DateTimePicker
-              value={date}
-              mode="date"
-              onChange={(e, selected) => selected && setDate(selected)}
-            />
+            <TouchableOpacity
+              style={styles.inputBox}
+              onPress={() => setShowDatePicker(true)}
+            >
+              <Ionicons name="calendar-outline" size={18} color="#6B7280" />
+              <Text style={styles.inputText}>
+                {date.toLocaleDateString()}
+              </Text>
+            </TouchableOpacity>
+
+            {showDatePicker && (
+              <DateTimePicker
+                value={date}
+                mode="date"
+                display="default"
+                onChange={(e, selected) => {
+                  setShowDatePicker(false);
+                  if (selected) setDate(selected);
+                }}
+              />
+            )}
 
             <Text style={styles.label}>Start Time</Text>
-            <DateTimePicker
-              value={startTime}
-              mode="time"
-              onChange={(e, selected) => selected && setStartTime(selected)}
-            />
+            <TouchableOpacity
+              style={styles.inputBox}
+              onPress={() => setShowStartPicker(true)}
+            >
+              <Ionicons name="time-outline" size={18} color="#6B7280" />
+              <Text style={styles.inputText}>
+                {startTime.toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </Text>
+            </TouchableOpacity>
+
+            {showStartPicker && (
+              <DateTimePicker
+                value={startTime}
+                mode="time"
+                display="default"
+                onChange={(e, selected) => {
+                  setShowStartPicker(false);
+                  if (selected) setStartTime(selected);
+                }}
+              />
+            )}
 
             <Text style={styles.label}>End Time</Text>
-            <DateTimePicker
-              value={endTime}
-              mode="time"
-              onChange={(e, selected) => selected && setEndTime(selected)}
-            />
+            <TouchableOpacity
+              style={styles.inputBox}
+              onPress={() => setShowEndPicker(true)}
+            >
+              <Ionicons name="time-outline" size={18} color="#6B7280" />
+              <Text style={styles.inputText}>
+                {endTime.toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </Text>
+            </TouchableOpacity>
+
+            {showEndPicker && (
+              <DateTimePicker
+                value={endTime}
+                mode="time"
+                display="default"
+                onChange={(e, selected) => {
+                  setShowEndPicker(false);
+                  if (selected) setEndTime(selected);
+                }}
+              />
+            )}
 
             <Text style={styles.label}>Purpose</Text>
             <TextInput
@@ -237,6 +292,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#6B7280",
     marginTop: 12,
+  },
+  inputBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F3F4F6",
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    marginTop: 6,
+    borderWidth: 1,
+    borderColor: "#D1D5DB",
+  },
+  inputText: {
+    marginLeft: 10,
+    fontSize: 15,
+    color: "#374151",
   },
   dropdown: {
     borderWidth: 1,

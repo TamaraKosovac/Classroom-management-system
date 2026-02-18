@@ -154,7 +154,7 @@ export default function ReservationsScreen() {
           {searchVisible ? (
             <View style={styles.searchContainer}>
               <TextInput
-                placeholder="Search classroom..."
+                placeholder="Search reservation..."
                 value={searchText}
                 onChangeText={setSearchText}
                 style={styles.searchInput}
