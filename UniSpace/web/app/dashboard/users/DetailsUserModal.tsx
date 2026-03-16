@@ -63,7 +63,7 @@ export default function DetailsUserModal({ user }: Props) {
               <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-lg">
                 <Calendar size={18} className="text-gray-500" />
                 <span>
-                  {new Date(user.createdAt).toLocaleDateString()}
+                  {new Date(user.createdAt).toLocaleDateString("sr-RS")}
                 </span>
               </div>
 

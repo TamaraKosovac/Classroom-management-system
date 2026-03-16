@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { API_URL } from "../../lib/config";
+import ClassroomFilterModal from "../../components/ClassroomFilterModal";
 
 type Classroom = {
   id: number;
@@ -23,8 +24,15 @@ type Classroom = {
   description?: string | null;
 };
 
+type Reservation = {
+  classroomId: number;
+  startTime: string;
+  endTime: string;
+};
+
 export default function ClassroomsScreen() {
   const [classrooms, setClassrooms] = useState<Classroom[]>([]);
+  const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [searchVisible, setSearchVisible] = useState(false);
@@ -33,12 +41,23 @@ export default function ClassroomsScreen() {
   const [floorFilterVisible, setFloorFilterVisible] = useState(false);
   const [selectedFloor, setSelectedFloor] = useState<number | null>(null);
 
+  const [calendarVisible, setCalendarVisible] = useState(false);
+
+  const [date, setDate] = useState(new Date());
+  const [startTime, setStartTime] = useState(new Date());
+  const [endTime, setEndTime] = useState(new Date());
+
   useEffect(() => {
-    const fetchClassrooms = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/classrooms`);
-        const data = await response.json();
-        setClassrooms(data);
+        const classroomsRes = await fetch(`${API_URL}/api/classrooms`);
+        const classroomsData = await classroomsRes.json();
+
+        const reservationsRes = await fetch(`${API_URL}/api/reservations`);
+        const reservationsData = await reservationsRes.json();
+
+        setClassrooms(classroomsData);
+        setReservations(reservationsData);
       } catch (error) {
         console.log(error);
       } finally {
@@ -46,12 +65,35 @@ export default function ClassroomsScreen() {
       }
     };
 
-    fetchClassrooms();
+    fetchData();
   }, []);
 
   const uniqueFloors = [...new Set(classrooms.map((c) => c.floor))].sort(
     (a, b) => a - b
   );
+
+  const isClassroomAvailable = (classroomId: number) => {
+    const selectedStart = new Date(date);
+    selectedStart.setHours(startTime.getHours(), startTime.getMinutes(), 0, 0);
+
+    const selectedEnd = new Date(date);
+    selectedEnd.setHours(endTime.getHours(), endTime.getMinutes(), 0, 0);
+
+    const classroomReservations = reservations.filter(
+      (r) => r.classroomId === classroomId
+    );
+
+    for (const r of classroomReservations) {
+      const rStart = new Date(r.startTime);
+      const rEnd = new Date(r.endTime);
+
+      if (selectedStart < rEnd && selectedEnd > rStart) {
+        return false;
+      }
+    }
+
+    return true;
+  };
 
   const filteredClassrooms = classrooms
     .filter((item) =>
@@ -59,7 +101,8 @@ export default function ClassroomsScreen() {
     )
     .filter((item) =>
       selectedFloor !== null ? item.floor === selectedFloor : true
-    );
+    )
+    .filter((item) => isClassroomAvailable(item.id));
 
   if (loading) {
     return (
@@ -76,17 +119,17 @@ export default function ClassroomsScreen() {
 
         <View style={styles.iconRow}>
           <TouchableOpacity
-            onPress={() =>
-              setFloorFilterVisible(!floorFilterVisible)
-            }
+            onPress={() => setFloorFilterVisible(!floorFilterVisible)}
           >
             <Ionicons
               name="layers-outline"
               size={26}
-              color={
-                selectedFloor !== null ? "#111827" : "#4B5563"
-              }
+              color={selectedFloor !== null ? "#111827" : "#4B5563"}
             />
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => setCalendarVisible(true)}>
+            <Ionicons name="calendar-outline" size={26} color="#4B5563" />
           </TouchableOpacity>
 
           {searchVisible ? (
@@ -98,6 +141,7 @@ export default function ClassroomsScreen() {
                 style={styles.searchInput}
                 autoFocus
               />
+
               <TouchableOpacity
                 onPress={() => {
                   setSearchVisible(false);
@@ -108,14 +152,8 @@ export default function ClassroomsScreen() {
               </TouchableOpacity>
             </View>
           ) : (
-            <TouchableOpacity
-              onPress={() => setSearchVisible(true)}
-            >
-              <Ionicons
-                name="search-outline"
-                size={26}
-                color="#4B5563"
-              />
+            <TouchableOpacity onPress={() => setSearchVisible(true)}>
+              <Ionicons name="search-outline" size={26} color="#4B5563" />
             </TouchableOpacity>
           )}
         </View>
@@ -136,7 +174,7 @@ export default function ClassroomsScreen() {
                   selectedFloor === null && styles.floorActive,
                 ]}
               >
-                All Floors
+                All floors
               </Text>
             </TouchableOpacity>
 
@@ -151,8 +189,7 @@ export default function ClassroomsScreen() {
                 <Text
                   style={[
                     styles.floorOption,
-                    selectedFloor === floor &&
-                      styles.floorActive,
+                    selectedFloor === floor && styles.floorActive,
                   ]}
                 >
                   Floor {floor}
@@ -170,9 +207,7 @@ export default function ClassroomsScreen() {
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.card}
-            onPress={() =>
-              router.push(`/classrooms/${item.id}`)
-            }
+            onPress={() => router.push(`/classrooms/${item.id}`)}
           >
             {item.image && (
               <Image
@@ -186,29 +221,28 @@ export default function ClassroomsScreen() {
               <Text style={styles.name}>{item.name}</Text>
 
               <View style={styles.infoRow}>
-                <Ionicons
-                  name="business-outline"
-                  size={16}
-                  color="#6B7280"
-                />
-                <Text style={styles.infoText}>
-                  {item.building}
-                </Text>
+                <Ionicons name="business-outline" size={16} color="#6B7280" />
+                <Text style={styles.infoText}>{item.building}</Text>
               </View>
 
               <View style={styles.infoRow}>
-                <Ionicons
-                  name="layers-outline"
-                  size={16}
-                  color="#6B7280"
-                />
-                <Text style={styles.infoText}>
-                  Floor {item.floor}
-                </Text>
+                <Ionicons name="layers-outline" size={16} color="#6B7280" />
+                <Text style={styles.infoText}>Floor {item.floor}</Text>
               </View>
             </View>
           </TouchableOpacity>
         )}
+      />
+
+      <ClassroomFilterModal
+        visible={calendarVisible}
+        onClose={() => setCalendarVisible(false)}
+        date={date}
+        startTime={startTime}
+        endTime={endTime}
+        setDate={setDate}
+        setStartTime={setStartTime}
+        setEndTime={setEndTime}
       />
     </View>
   );
@@ -263,10 +297,6 @@ const styles = StyleSheet.create({
     width: 160,
     borderWidth: 1,
     borderColor: "#E5E7EB",
-    shadowColor: "#000",
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 8,
   },
 
   floorOption: {
@@ -293,10 +323,6 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderWidth: 1,
     borderColor: "#E5E7EB",
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 3,
   },
 
   image: {

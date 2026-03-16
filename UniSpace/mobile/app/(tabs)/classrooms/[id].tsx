@@ -12,7 +12,6 @@ import { useLocalSearchParams, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { API_URL } from "../../../lib/config";
 
-
 type Classroom = {
   id: number;
   name: string;
@@ -22,7 +21,6 @@ type Classroom = {
   image?: string | null;
   description?: string | null;
 };
-
 
 export default function ClassroomDetails() {
   const { id } = useLocalSearchParams();
@@ -83,7 +81,7 @@ export default function ClassroomDetails() {
         />
       )}
 
-      <View style={styles.content}>
+      <View style={styles.card}>
         <Text style={styles.name}>{classroom.name}</Text>
 
         <View style={styles.infoRow}>
@@ -99,13 +97,17 @@ export default function ClassroomDetails() {
         <View style={styles.infoRow}>
           <Ionicons name="people-outline" size={18} color="#6B7280" />
           <Text style={styles.infoText}>
-            Capacity {classroom.capacity}
+            {classroom.capacity} seats
           </Text>
         </View>
 
         {classroom.description && (
           <View style={styles.infoRow}>
-            <Ionicons name="document-text-outline" size={18} color="#6B7280" />
+            <Ionicons
+              name="document-text-outline"
+              size={18}
+              color="#6B7280"
+            />
             <Text style={styles.infoText}>
               {classroom.description}
             </Text>
@@ -144,8 +146,17 @@ const styles = StyleSheet.create({
     height: 220,
   },
 
-  content: {
+  card: {
+    backgroundColor: "white",
+    marginHorizontal: 16,
+    marginTop: 60,
     padding: 20,
+    borderRadius: 14,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
   },
 
   name: {

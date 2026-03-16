@@ -92,25 +92,24 @@ export default function ProfileScreen() {
 
         <View style={styles.infoRow}>
           <Ionicons name="person-outline" size={18} color="#6B7280" />
-          <Text style={styles.infoText}>
+          <Text style={styles.value}>
             {user.firstName} {user.lastName}
           </Text>
         </View>
 
         <View style={styles.infoRow}>
           <Ionicons name="mail-outline" size={18} color="#6B7280" />
-          <Text style={styles.infoText}>{user.email}</Text>
+          <Text style={styles.value}>{user.email}</Text>
         </View>
 
         <View style={styles.infoRow}>
           <Ionicons name="school-outline" size={18} color="#6B7280" />
-          <Text style={styles.infoText}>{user.role}</Text>
+          <Text style={styles.value}>{user.role}</Text>
         </View>
 
         <View style={styles.infoRow}>
           <Ionicons name="calendar-outline" size={18} color="#6B7280" />
-          <Text style={styles.infoText}>
-            Joined:{" "}
+          <Text style={styles.value}>
             {new Date(user.createdAt).toLocaleDateString("bs-BA")}
           </Text>
         </View>
@@ -175,34 +174,37 @@ const styles = StyleSheet.create({
 
   card: {
     backgroundColor: "white",
-    paddingVertical: 20,
-    paddingHorizontal: 60,
+    paddingVertical: 25,
+    paddingHorizontal: 20,
     borderRadius: 14,
     marginTop: 60,
     marginBottom: 40,
     borderWidth: 1,
     borderColor: "#E5E7EB",
-    alignItems: "center",
   },
 
   avatar: {
     width: 110,
     height: 110,
     borderRadius: 55,
-    marginBottom: 20,
+    marginBottom: 25,
+    alignSelf: "center",
   },
 
   infoRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    marginTop: 12,
+    marginTop: 14,
   },
 
-  infoText: {
-    fontSize: 16,
-    color: "#4B5563",
+  value: {
+    fontSize: 15,
+    fontWeight: "500",
+    color: "#111827",
     marginLeft: 10,
+    flex: 1,
+    flexShrink: 1,
+    flexWrap: "wrap",
   },
 
   editButton: {

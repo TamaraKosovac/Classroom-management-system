@@ -123,7 +123,7 @@ export default function AddReservationModal({
       <View style={styles.overlay}>
         <View style={styles.modal}>
           <View style={styles.header}>
-            <Text style={styles.title}>Add Reservation</Text>
+            <Text style={styles.title}>Add reservation</Text>
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={24} color="#6B7280" />
             </TouchableOpacity>
@@ -194,7 +194,7 @@ export default function AddReservationModal({
               />
             )}
 
-            <Text style={styles.label}>Start Time</Text>
+            <Text style={styles.label}>Start time</Text>
             <TouchableOpacity
               style={styles.inputBox}
               onPress={() => setShowStartPicker(true)}
@@ -220,7 +220,7 @@ export default function AddReservationModal({
               />
             )}
 
-            <Text style={styles.label}>End Time</Text>
+            <Text style={styles.label}>End time</Text>
             <TouchableOpacity
               style={styles.inputBox}
               onPress={() => setShowEndPicker(true)}
@@ -248,7 +248,7 @@ export default function AddReservationModal({
 
             <Text style={styles.label}>Purpose</Text>
             <TextInput
-              placeholder="Optional"
+              placeholder="Enter purpose"
               value={purpose}
               onChangeText={setPurpose}
               style={styles.input}
