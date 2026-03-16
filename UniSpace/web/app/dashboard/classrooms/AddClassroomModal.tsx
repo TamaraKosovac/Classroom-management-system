@@ -70,6 +70,7 @@ export default function AddClassroomModal({
                   </label>
                   <input
                     name="name"
+                    placeholder="Enter classroom name"
                     required
                     className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-700 transition"
                   />
@@ -81,6 +82,7 @@ export default function AddClassroomModal({
                   </label>
                   <input
                     name="building"
+                    placeholder="Enter building name"
                     required
                     className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-700 transition"
                   />
@@ -93,6 +95,7 @@ export default function AddClassroomModal({
                   <input
                     type="number"
                     name="floor"
+                    placeholder="Enter floor number"
                     required
                     className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-700 transition"
                   />
@@ -105,6 +108,7 @@ export default function AddClassroomModal({
                   <input
                     type="number"
                     name="capacity"
+                    placeholder="Enter seating capacity"
                     required
                     className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-700 transition"
                   />
@@ -164,6 +168,7 @@ export default function AddClassroomModal({
                 </label>
                 <textarea
                   name="description"
+                  placeholder="Enter classroom description"
                   rows={4}
                   className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-700 transition"
                 />

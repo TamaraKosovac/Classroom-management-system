@@ -27,7 +27,7 @@ export default function DetailsUserModal({ user }: Props) {
           onClick={() => setOpen(false)}
         >
           <div
-            className="bg-white w-full max-w-lg rounded-xl shadow-lg p-6 relative"
+            className="bg-white w-full max-w-xl rounded-xl shadow-lg p-6 relative"
             onClick={(e) => e.stopPropagation()}
           >
             <button
@@ -50,7 +50,7 @@ export default function DetailsUserModal({ user }: Props) {
                 </span>
               </div>
 
-              <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-lg">
+              <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-lg break-all">
                 <Mail size={18} className="text-gray-500" />
                 <span>{user.email}</span>
               </div>
@@ -70,13 +70,13 @@ export default function DetailsUserModal({ user }: Props) {
             </div>
 
             {user.image && (
-              <div className="mt-5">
+              <div className="mt-6 flex justify-center">
                 <Image
                   src={user.image}
                   alt={`${user.firstName} ${user.lastName}`}
-                  width={600}
-                  height={400}
-                  className="rounded-lg object-contain w-full max-h-96"
+                  width={160}
+                  height={160}
+                  className="rounded-lg object-cover w-40 h-40"
                   unoptimized
                 />
               </div>

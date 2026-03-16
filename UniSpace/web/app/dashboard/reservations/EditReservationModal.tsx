@@ -99,7 +99,7 @@ export default function EditReservationModal({
                   <select
                     name="userId"
                     defaultValue={reservation.userId}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm 
+                    className="w-full border border-gray-300 rounded-lg pl-2 pr-3 py-2 text-sm 
                                focus:outline-none focus:ring-2 focus:ring-gray-700 transition"
                   >
                     {users.map((u) => (
@@ -117,7 +117,7 @@ export default function EditReservationModal({
                   <select
                     name="classroomId"
                     defaultValue={reservation.classroomId}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm 
+                    className="w-full border border-gray-300 rounded-lg pl-2 pr-3 py-2 text-sm 
                                focus:outline-none focus:ring-2 focus:ring-gray-700 transition"
                   >
                     {classrooms.map((c) => (
@@ -148,6 +148,7 @@ export default function EditReservationModal({
                   <input
                     type="text"
                     name="purpose"
+                    placeholder="Enter purpose"
                     defaultValue={reservation.purpose ?? ""}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm 
                                focus:outline-none focus:ring-2 focus:ring-gray-700 transition"

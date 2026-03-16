@@ -83,6 +83,7 @@ export default function EditClassroomModal({
                   </label>
                   <input
                     name="name"
+                    placeholder="Enter classroom name"
                     defaultValue={classroom.name}
                     required
                     className="border border-gray-300 rounded-lg px-3 py-2 text-sm 
@@ -96,6 +97,7 @@ export default function EditClassroomModal({
                   </label>
                   <input
                     name="building"
+                    placeholder="Enter building name"
                     defaultValue={classroom.building}
                     required
                     className="border border-gray-300 rounded-lg px-3 py-2 text-sm 
@@ -110,6 +112,7 @@ export default function EditClassroomModal({
                   <input
                     type="number"
                     name="floor"
+                    placeholder="Enter floor number"
                     defaultValue={classroom.floor}
                     required
                     className="border border-gray-300 rounded-lg px-3 py-2 text-sm 
@@ -124,6 +127,7 @@ export default function EditClassroomModal({
                   <input
                     type="number"
                     name="capacity"
+                    placeholder="Enter seating capacity"
                     defaultValue={classroom.capacity}
                     required
                     className="border border-gray-300 rounded-lg px-3 py-2 text-sm 
@@ -185,6 +189,7 @@ export default function EditClassroomModal({
                 </label>
                 <textarea
                   name="description"
+                  placeholder="Enter classroom description"
                   defaultValue={classroom.description ?? ""}
                   rows={4}
                   className="border border-gray-300 rounded-lg px-3 py-2 text-sm 

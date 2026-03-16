@@ -175,7 +175,8 @@ const styles = StyleSheet.create({
 
   card: {
     backgroundColor: "white",
-    padding: 20,
+    paddingVertical: 20,
+    paddingHorizontal: 60,
     borderRadius: 14,
     marginTop: 60,
     marginBottom: 40,
@@ -194,6 +195,7 @@ const styles = StyleSheet.create({
   infoRow: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     marginTop: 12,
   },
 

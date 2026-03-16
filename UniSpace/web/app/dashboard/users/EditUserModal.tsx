@@ -84,6 +84,7 @@ export default function EditUserModal({
                   </label>
                   <input
                     name="firstName"
+                    placeholder="Enter first name"
                     defaultValue={user.firstName}
                     required
                     className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-700 transition"
@@ -96,6 +97,7 @@ export default function EditUserModal({
                   </label>
                   <input
                     name="lastName"
+                    placeholder="Enter last name"
                     defaultValue={user.lastName}
                     required
                     className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-700 transition"
@@ -109,6 +111,7 @@ export default function EditUserModal({
                   <input
                     name="email"
                     type="email"
+                    placeholder="Enter email address"
                     defaultValue={user.email}
                     required
                     className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-700 transition"

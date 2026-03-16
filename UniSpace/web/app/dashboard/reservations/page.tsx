@@ -230,7 +230,7 @@ export default async function ReservationsPage({
         />
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden max-h-[500px] overflow-y-auto">
         <table className="w-full text-left">
           <thead className="bg-gray-50 text-gray-600 text-sm uppercase">
             <tr>
@@ -251,10 +251,10 @@ export default async function ReservationsPage({
                 <td className="px-6 py-4 text-gray-600">
                   {res.classroom.name}
                 </td>
-                <td className="px-6 py-4 text-gray-600">
+                <td className="px-4 py-4 text-gray-600">
                   {new Date(res.date).toLocaleDateString()}
                 </td>
-                <td className="px-6 py-4 text-gray-600">
+                <td className="px-4 py-4 text-gray-600">
                   {new Date(res.startTime).toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit",

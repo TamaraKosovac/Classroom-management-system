@@ -182,7 +182,7 @@ export default async function ClassroomsPage({
         <AddClassroomModal createAction={createClassroom} />
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden max-h-[500px] overflow-y-auto">
         <table className="w-full text-left">
           <thead className="bg-gray-50 text-gray-600 text-sm uppercase">
             <tr>
@@ -200,13 +200,13 @@ export default async function ClassroomsPage({
                 <td className="px-6 py-4 font-medium text-gray-700">
                   {room.name}
                 </td>
-                <td className="px-6 py-4 text-gray-600">
+                <td className="px-10 py-4 text-gray-600">
                   {room.building}
                 </td>
-                <td className="px-6 py-4 text-gray-600">
+                <td className="px-10 py-4 text-gray-600">
                   {room.floor}
                 </td>
-                <td className="px-6 py-4 text-gray-600">
+                <td className="px-12 py-4 text-gray-600">
                   {room.capacity}
                 </td>
 

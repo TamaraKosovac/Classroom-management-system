@@ -85,7 +85,7 @@ export default function AddReservationModal({
                     name="userId"
                     defaultValue={users[0]?.id}
                     required
-                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm 
+                    className="border border-gray-300 rounded-lg pl-2 pr-3 py-2 text-sm 
                                focus:outline-none focus:ring-2 focus:ring-gray-700 transition"
                   >
                     {users.map((user) => (
@@ -104,7 +104,7 @@ export default function AddReservationModal({
                     name="classroomId"
                     defaultValue={classrooms[0]?.id}
                     required
-                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm 
+                    className="border border-gray-300 rounded-lg pl-2 pr-3 py-2 text-sm 
                                focus:outline-none focus:ring-2 focus:ring-gray-700 transition"
                   >
                     {classrooms.map((c) => (
@@ -135,6 +135,7 @@ export default function AddReservationModal({
                   <input
                     type="text"
                     name="purpose"
+                    placeholder="Enter purpose"
                     className="border border-gray-300 rounded-lg px-3 py-2 text-sm 
                                focus:outline-none focus:ring-2 focus:ring-gray-700 transition"
                   />

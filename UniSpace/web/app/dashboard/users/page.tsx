@@ -185,13 +185,13 @@ export default async function UsersPage({
         <AddUserModal createUserAction={createUser} />
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden max-h-[500px] overflow-y-auto">
         <table className="w-full text-left">
           <thead className="bg-gray-50 text-gray-600 text-sm uppercase">
             <tr>
               <th className="px-6 py-3"></th>
               <th className="px-6 py-3">Full Name</th>
-              <th className="px-6 py-3">Email</th>
+              <th className="px-24 py-3">Email</th>
               <th className="px-6 py-3">Role</th>
               <th className="px-6 py-3"></th>
             </tr>
@@ -223,11 +223,11 @@ export default async function UsersPage({
                   {user.firstName} {user.lastName}
                 </td>
 
-                <td className="px-6 py-4 text-gray-600">
+                <td className="px-6 py-4 text-gray-600 max-w-[220px] truncate">
                   {user.email}
                 </td>
 
-                <td className="px-6 py-4">
+                <td className="pl-2 pr-6 py-4">
                   <span className="px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-700">
                     {user.role}
                   </span>
