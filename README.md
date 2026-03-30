@@ -47,12 +47,14 @@
   <img src="Screenshots/userLogin.jpg" alt="Login screen" width="250" />
 </div>
 
+
  - Classrooms - browse, search and filter classrooms by floor and availability for students and teachers
 
 <div>
   <img src="Screenshots/allClassrooms.jpg" alt="All classrooms screen" width="250" style="margin-left: 20px; margin-right: 10px;" />
   <img src="Screenshots/filterByFloors.jpg" alt="Filter by floors screen" width="250" />
 </div>
+
 
  - Reservations - view, search and filter reservations for students and teachers, while only teachers can create, update and delete their reservations
 
@@ -65,6 +67,7 @@
   <img src="Screenshots/addReservation.jpg" alt="Add reservation screen" width="250" style="margin-left: 20px; margin-right: 10px;" />
   <img src="Screenshots/filterReservation.jpg" alt="Filter reservation screen" width="250" />
 </div>
+
 
  - Profile - view and edit profile information
 
